@@ -1,0 +1,32 @@
+# Python Virtual Environment
+venv/
+/venv
+*.venv
+
+# Byte-compiled / optimized / C files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment variables
+.env
+.env.*
+
+# IDE and Editor Directories
+.vscode/
+.idea/
+*.project
+*.pydevproject
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# Test outputs
+/htmlcov
+.pytest_cache
+.coverage
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints
