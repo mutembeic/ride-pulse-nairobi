@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_61ca883b87319791eb0d61a87c6cbf2b {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+    <script src="https://cdn.jsdelivr.net/gh/python-visualization/folium@main/folium/templates/leaflet_heat.min.js"></script>
+</head>
+<body>
+    
+    
+    <h3 style="position:fixed; top:10px; left:50px; z-index:9999; 
+    background-color:white; padding:10px; border-radius:5px;
+    box-shadow:0 0 5px rgba(0,0,0,0.2); font-size:16px;">
+    Nairobi Traffic Heatmap</h3>
+    
+    
+            <div class="folium-map" id="map_61ca883b87319791eb0d61a87c6cbf2b" ></div>
+        
+    
+<div style="
+    position: fixed; 
+    bottom: 50px;
+    left: 50px;
+    width: 180px;
+    z-index:9999;
+    font-size:12px;
+    background-color:white;
+    padding:10px;
+    border-radius:5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    ">
+    <p style="margin-top:0; font-weight:bold; text-align:center;">Traffic Key</p>
+    <div style="background: linear-gradient(to right, #0000ff, #00ffff, #ffff00, #ff0000); 
+                height: 20px;
+                margin-bottom: 10px;
+                border-radius:3px;"></div>
+    <div style="display: flex; justify-content: space-between; margin-bottom:5px;">
+        <span>Flowing</span>
+        <span>Gridlock</span>
+    </div>
+    <div style="border-top:1px solid #ddd; margin:8px 0; padding-top:8px;">
+        <div style="display:flex; align-items:center; margin-bottom:4px;">
+            <div style="background:#2ecc71; width:12px; height:12px; border-radius:50%; margin-right:6px;"></div>
+            <span>Major Landmark</span>
+        </div>
+        <div style="display:flex; align-items:center; margin-bottom:4px;">
+            <div style="background:#e74c3c; width:12px; height:12px; border-radius:50%; margin-right:6px;"></div>
+            <span>Accident Prone</span>
+        </div>
+        <div style="display:flex; align-items:center;">
+            <div style="background:#3498db; width:12px; height:12px; border-radius:50%; margin-right:6px;"></div>
+            <span>Traffic Police</span>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    
+    
+            var map_61ca883b87319791eb0d61a87c6cbf2b = L.map(
+                "map_61ca883b87319791eb0d61a87c6cbf2b",
+                {
+                    center: [-1.286389, 36.817223],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 11,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+            L.control.scale().addTo(map_61ca883b87319791eb0d61a87c6cbf2b);
+
+            
+
+        
+    
+            var tile_layer_b17db65234f777e113a8ed0f49ba9b27 = L.tileLayer(
+                "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 20,
+  "maxNativeZoom": 20,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors \u0026copy; \u003ca href=\"https://carto.com/attributions\"\u003eCARTO\u003c/a\u003e",
+  "subdomains": "abcd",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_b17db65234f777e113a8ed0f49ba9b27.addTo(map_61ca883b87319791eb0d61a87c6cbf2b);
+        
+    
+            var heat_map_d4b513285e9e9169586e471a4eaa28cd = L.heatLayer(
+                [[-1.3376379643457912, 36.96789306008833, 4.0], [-1.1647857080770252, 36.73384666173344, 3.0], [-1.2304018174565785, 36.70071320523193, 7.0], [-1.270402454740889, 36.82130846609714, 8.0], [-1.403194407867269, 36.99497765893871, 4.0], [-1.4032016438991393, 36.73471934502902, 2.0], [-1.43257491634954, 36.88524744159206, 3.0], [-1.1901471562675194, 36.91656686536505, 1.0], [-1.2696654964770373, 36.73317314039734, 8.0], [-1.2375782266611863, 36.904875722014154, 3.0], [-1.4438246517112592, 36.77872409645174, 7.0], [-1.1590270443514017, 36.871307040707755, 5.0], [-1.2002672077598735, 36.87173539876631, 5.0], [-1.3862982667965171, 36.837521139426165, 7.0], [-1.3954525098378698, 36.68160141951904, 9.0], [-1.3949786470439698, 36.942355873456236, 5.0], [-1.3587273271121387, 36.762273022740104, 1.0], [-1.2925730705103287, 36.715281478639945, 1.0], [-1.3204164944073653, 36.66427129954417, 2.0], [-1.3626312579405875, 36.85681253011588, 6.0], [-1.2664441315832862, 36.887147526644796, 9.0], [-1.4081518418043875, 36.65580574012475, 8.0], [-1.3623566054394345, 36.82923257040475, 5.0], [-1.3400914470118925, 36.72927352131928, 1.0], [-1.3131790047348892, 36.87581047664331, 7.0], [-1.214447211582096, 36.71102825015175, 5.0], [-1.390097865352492, 36.891828208335866, 6.0], [-1.2957296684759165, 36.78535737120519, 7.0], [-1.2722756293413873, 36.977855496057856, 3.0], [-1.4360648761840007, 36.698132330451095, 3.0], [-1.2677365444295685, 36.76937322286759, 5.0], [-1.3988427628938125, 36.6897157324342, 6.0], [-1.430484522104416, 36.9736427663975, 9.0], [-1.165334338824, 36.957068773683346, 5.0], [-1.1603103900776321, 36.740279569700306, 1.0], [-1.2074807955650615, 36.88099441611196, 4.0], [-1.3586158692479888, 36.936027770070424, 5.0], [-1.4206983657980847, 36.84432028405981, 5.0], [-1.2447300920463529, 36.8353777024246, 7.0], [-1.3179542518781195, 36.734648301815156, 4.0], [-1.4133885295465662, 36.68258596873206, 1.0], [-1.301446926966619, 36.964025515283666, 5.0], [-1.4396834436654344, 36.965146320007165, 7.0], [-1.1772038793763653, 36.87158551004564, 6.0], [-1.3723660055199949, 36.768660426867044, 5.0], [-1.2512433146938053, 36.772223351114434, 4.0], [-1.3564866771731767, 36.904084487604585, 2.0], [-1.2939795936466567, 36.963988590983405, 4.0], [-1.285986916197016, 36.96048024849279, 3.0], [-1.3945436633423418, 36.92295644105017, 1.0], [-1.1591246116706324, 36.874711076154, 8.0], [-1.2174601529916655, 36.679448987748266, 5.0], [-1.1681503175307433, 36.70657004993311, 4.0], [-1.1815517948717051, 36.96449396598448, 8.0], [-1.2706300063566744, 36.862250170880856, 7.0], [-1.173437729493065, 36.65321896806582, 2.0], [-1.4234522493844242, 36.68551504000311, 1.0], [-1.3912051412742563, 36.88222561918782, 4.0], [-1.4364318133268386, 36.651771554346176, 8.0], [-1.3524009007710207, 36.706282817996126, 2.0], [-1.3333968130931553, 36.8420568262783, 3.0], [-1.3685952904678311, 36.89216331919244, 1.0], [-1.201378747254421, 36.87818644082591, 1.0], [-1.3429740019919232, 36.728494258311194, 3.0], [-1.3657196470937858, 36.89926272747164, 5.0], [-1.2871911750525253, 36.73303718062388, 3.0], [-1.4077227325075712, 36.76388989435574, 1.0], [-1.209340905773788, 36.91127199179131, 1.0], [-1.4276348068960687, 36.87737151466652, 8.0], [-1.1539339190198448, 36.94722819367296, 2.0], [-1.2183265692110026, 36.88016451230512, 3.0], [-1.3903852955397482, 36.84890801116742, 2.0], [-1.4483433648629191, 36.68278616873983, 3.0], [-1.2053615714635497, 36.778700531070804, 7.0], [-1.2379427968457148, 36.7428208286886, 1.0], [-1.2312978495877038, 36.73539637518268, 8.0], [-1.2186188959942161, 36.99055369416335, 2.0], [-1.427786604479773, 36.787584203633365, 3.0], [-1.3424602814367181, 36.962216294311986, 9.0], [-1.415239282142461, 36.87089851909904, 7.0], [-1.1910689722373218, 36.92818395623958, 4.0], [-1.2630105619517327, 36.82592298258682, 5.0], [-1.3507305925442052, 36.851916359619224, 2.0], [-1.4309324949141928, 36.8223811928366, 8.0], [-1.3567053034853014, 36.71833504572931, 4.0], [-1.352445003391976, 36.90285824034153, 9.0], [-1.2311181464985808, 36.748270326854296, 5.0], [-1.258732758593436, 36.658510588251005, 9.0], [-1.183836177227102, 36.87591530356751, 4.0], [-1.308335522451415, 36.71198873779247, 5.0], [-1.4141217262185095, 36.97916050452352, 9.0], [-1.2360265638331014, 36.983875001950906, 8.0], [-1.2217644854149308, 36.970202536577155, 3.0], [-1.281616840729151, 36.7795555450894, 1.0], [-1.2187098460136316, 36.6554098157851, 3.0], [-1.3018613210906826, 36.974911496905705, 4.0], [-1.2931801511854017, 36.79986445191106, 2.0], [-1.321737694492435, 36.98832918666528, 1.0], [-1.4423742619767714, 36.98726699198124, 7.0], [-1.4176325719020086, 36.948553309413576, 8.0], [-1.4405712442939798, 36.753057112224354, 7.0], [-1.2590768766208658, 36.78478420501067, 5.0], [-1.355693205677102, 36.9478978350309, 1.0], [-1.2974287926505892, 36.760922701804695, 7.0], [-1.1777300578221719, 36.70932246134013, 7.0], [-1.3752123312553375, 36.844880441860425, 9.0], [-1.326885123089311, 36.97765417095627, 3.0], [-1.2233346584370852, 36.89361042883624, 9.0], [-1.3813605503525133, 36.84952140953128, 1.0], [-1.426906027051362, 36.684011772819765, 1.0], [-1.3630745641258695, 36.86525252934471, 4.0], [-1.4016336138237986, 36.99651884753649, 9.0], [-1.171090704297228, 36.69902940533278, 6.0], [-1.2075638861306748, 36.83141537832731, 3.0], [-1.2599788730468728, 36.957080575174786, 1.0], [-1.1885618229436847, 36.90926901621397, 4.0], [-1.2088983769302657, 36.893955509348345, 9.0], [-1.3940289823341891, 36.89586942939549, 3.0], [-1.1822323004530066, 36.775821902926914, 9.0], [-1.2881973274253047, 36.75275714549257, 7.0], [-1.2077679534507813, 36.93327640441748, 4.0], [-1.1811726100229518, 36.933539688137714, 3.0], [-1.3545989575084407, 36.953475311503034, 5.0], [-1.416984422641697, 36.96963419339477, 5.0], [-1.3816194512374174, 36.82896983960133, 3.0], [-1.3218676634121231, 36.82553070314052, 9.0], [-1.204595570223252, 36.92940331263837, 4.0], [-1.191780825023097, 36.87748737577222, 5.0], [-1.4479143608406428, 36.8956884070402, 4.0], [-1.2967758092267303, 36.92852743430264, 5.0], [-1.3247766990553662, 36.961501869636145, 7.0], [-1.383367656858781, 36.76829830489804, 9.0], [-1.4140403897998952, 36.78145403342398, 7.0], [-1.3487154485789115, 36.6828936789443, 5.0], [-1.1671270888262442, 36.85239804934866, 7.0], [-1.3530391203937733, 36.66257979582886, 5.0], [-1.2943628134769902, 36.81295930634636, 3.0], [-1.2390943123314466, 36.83992562214765, 7.0], [-1.3409111192862118, 36.7502894382449, 2.0], [-1.1584653751837117, 36.85679164119915, 9.0], [-1.1612658115173664, 36.660675087478666, 1.0], [-1.3744653112523908, 36.663071866062225, 6.0], [-1.3008254482322843, 36.93791019623088, 7.0], [-1.359736507054969, 36.776066724493944, 8.0], [-1.3645478516867597, 36.694471179428156, 9.0], [-1.43893391579364, 36.83278514101918, 2.0], [-1.2671306998060308, 36.919497743584515, 2.0], [-1.2991962930313414, 36.72553735962389, 5.0], [-1.4345563746250032, 36.86801166653665, 5.0], [-1.3664060607290165, 36.67987161274782, 6.0]],
+                {
+  "minOpacity": 0.5,
+  "maxZoom": 18,
+  "radius": 15,
+  "blur": 8,
+  "gradient": {
+  0.1: "blue",
+  0.3: "cyan",
+  0.5: "lime",
+  0.7: "yellow",
+  1: "red",
+},
+  "zoom": 10,
+}
+            );
+        
+    
+            heat_map_d4b513285e9e9169586e471a4eaa28cd.addTo(map_61ca883b87319791eb0d61a87c6cbf2b);
+        
+    
+            var marker_0badae006fa69b430f9ce2245979373a = L.marker(
+                [-1.286389, 36.817223],
+                {
+}
+            ).addTo(map_61ca883b87319791eb0d61a87c6cbf2b);
+        
+    
+            var icon_9c652aab10b6715952973ff8717e47a1 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_377c65b0f14019851831623442ed9e24 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_5a96cb8aa2881027b1e15755424f2432 = $(`<div id="html_5a96cb8aa2881027b1e15755424f2432" style="width: 100.0%; height: 100.0%;"><b>Nairobi CBD</b><br>Central Business District</div>`)[0];
+                popup_377c65b0f14019851831623442ed9e24.setContent(html_5a96cb8aa2881027b1e15755424f2432);
+            
+        
+
+        marker_0badae006fa69b430f9ce2245979373a.bindPopup(popup_377c65b0f14019851831623442ed9e24)
+        ;
+
+        
+    
+    
+                marker_0badae006fa69b430f9ce2245979373a.setIcon(icon_9c652aab10b6715952973ff8717e47a1);
+            
+    
+            var marker_4db67f19e1c7a23469b755031203ee81 = L.marker(
+                [-1.3192, 36.9278],
+                {
+}
+            ).addTo(map_61ca883b87319791eb0d61a87c6cbf2b);
+        
+    
+            var icon_8a0778b18019b92b92eeef78d4401c2e = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_37127f4f9c44eda214dc131feb0677f8 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_fc63a95bffe52e16cdd2cb1ae9ea8d4a = $(`<div id="html_fc63a95bffe52e16cdd2cb1ae9ea8d4a" style="width: 100.0%; height: 100.0%;"><b>JKIA Airport</b><br>Jomo Kenyatta International Airport</div>`)[0];
+                popup_37127f4f9c44eda214dc131feb0677f8.setContent(html_fc63a95bffe52e16cdd2cb1ae9ea8d4a);
+            
+        
+
+        marker_4db67f19e1c7a23469b755031203ee81.bindPopup(popup_37127f4f9c44eda214dc131feb0677f8)
+        ;
+
+        
+    
+    
+                marker_4db67f19e1c7a23469b755031203ee81.setIcon(icon_8a0778b18019b92b92eeef78d4401c2e);
+            
+    
+            var marker_5b1e1c82596b8bbcba1fe0ad70200a7f = L.marker(
+                [-1.2886, 36.8233],
+                {
+}
+            ).addTo(map_61ca883b87319791eb0d61a87c6cbf2b);
+        
+    
+            var icon_4a1bdb293fd280cc17de039ba5b5ffd7 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_062139278e011ce428e20dc962d4e3e7 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_1fd6a346e719fd12d9682ea96dd378be = $(`<div id="html_1fd6a346e719fd12d9682ea96dd378be" style="width: 100.0%; height: 100.0%;"><b>KICC</b><br>Kenyatta International Convention Centre</div>`)[0];
+                popup_062139278e011ce428e20dc962d4e3e7.setContent(html_1fd6a346e719fd12d9682ea96dd378be);
+            
+        
+
+        marker_5b1e1c82596b8bbcba1fe0ad70200a7f.bindPopup(popup_062139278e011ce428e20dc962d4e3e7)
+        ;
+
+        
+    
+    
+                marker_5b1e1c82596b8bbcba1fe0ad70200a7f.setIcon(icon_4a1bdb293fd280cc17de039ba5b5ffd7);
+            
+    
+            var marker_318efdffe9a2d402d4971d6f60c80fc0 = L.marker(
+                [-1.2136, 36.8997],
+                {
+}
+            ).addTo(map_61ca883b87319791eb0d61a87c6cbf2b);
+        
+    
+            var icon_b5f5191c9f56c35ba0e1b6fac8464446 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "red",
+  "iconColor": "white",
+  "icon": "exclamation-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_2352c5112d4aa54483b12e73f1a885b7 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_37835fdc307a964762a9aa7d4e945db4 = $(`<div id="html_37835fdc307a964762a9aa7d4e945db4" style="width: 100.0%; height: 100.0%;"><b>⚠ Thika Road</b><br>High accident rate area</div>`)[0];
+                popup_2352c5112d4aa54483b12e73f1a885b7.setContent(html_37835fdc307a964762a9aa7d4e945db4);
+            
+        
+
+        marker_318efdffe9a2d402d4971d6f60c80fc0.bindPopup(popup_2352c5112d4aa54483b12e73f1a885b7)
+        ;
+
+        
+    
+    
+                marker_318efdffe9a2d402d4971d6f60c80fc0.setIcon(icon_b5f5191c9f56c35ba0e1b6fac8464446);
+            
+    
+            var marker_e8227e8d9dc4c907175b7d6ed6fc80ac = L.marker(
+                [-1.3195, 36.8348],
+                {
+}
+            ).addTo(map_61ca883b87319791eb0d61a87c6cbf2b);
+        
+    
+            var icon_5552a55f33142249a14ade1b1926d129 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "red",
+  "iconColor": "white",
+  "icon": "exclamation-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_c7b22fcbefddc1f1c60d3d723a178e78 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_d3c7fe8bbe32364406b47d854023bc50 = $(`<div id="html_d3c7fe8bbe32364406b47d854023bc50" style="width: 100.0%; height: 100.0%;"><b>⚠ Mombasa Road</b><br>Frequent truck accidents</div>`)[0];
+                popup_c7b22fcbefddc1f1c60d3d723a178e78.setContent(html_d3c7fe8bbe32364406b47d854023bc50);
+            
+        
+
+        marker_e8227e8d9dc4c907175b7d6ed6fc80ac.bindPopup(popup_c7b22fcbefddc1f1c60d3d723a178e78)
+        ;
+
+        
+    
+    
+                marker_e8227e8d9dc4c907175b7d6ed6fc80ac.setIcon(icon_5552a55f33142249a14ade1b1926d129);
+            
+    
+            var marker_9491386f5b781f007d8ecc44659cb6ec = L.marker(
+                [-1.1475, 36.9638],
+                {
+}
+            ).addTo(map_61ca883b87319791eb0d61a87c6cbf2b);
+        
+    
+            var icon_f369d54ecea9a9e064df45b271ff8610 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "flag",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_2d26e19fb153f2cdd188117ceb5e63f8 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_0719b19c5c4c73ed6e25e0405f5eeb60 = $(`<div id="html_0719b19c5c4c73ed6e25e0405f5eeb60" style="width: 100.0%; height: 100.0%;"><b>🚓 Ruiru Checkpoint</b><br>24/7 traffic police presence</div>`)[0];
+                popup_2d26e19fb153f2cdd188117ceb5e63f8.setContent(html_0719b19c5c4c73ed6e25e0405f5eeb60);
+            
+        
+
+        marker_9491386f5b781f007d8ecc44659cb6ec.bindPopup(popup_2d26e19fb153f2cdd188117ceb5e63f8)
+        ;
+
+        
+    
+    
+                marker_9491386f5b781f007d8ecc44659cb6ec.setIcon(icon_f369d54ecea9a9e064df45b271ff8610);
+            
+    
+            var marker_f091607ee4724ce23060c4c45b9682fc = L.marker(
+                [-1.3286, 36.8125],
+                {
+}
+            ).addTo(map_61ca883b87319791eb0d61a87c6cbf2b);
+        
+    
+            var icon_4a6ad34da9b2fa64ae6eb39830d858aa = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "flag",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_1ba3fee090aa6e059efd021209793790 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_fcca88b8e7c3559f6ad43588ee189dde = $(`<div id="html_fcca88b8e7c3559f6ad43588ee189dde" style="width: 100.0%; height: 100.0%;"><b>🚓 Langata Road</b><br>Morning traffic control</div>`)[0];
+                popup_1ba3fee090aa6e059efd021209793790.setContent(html_fcca88b8e7c3559f6ad43588ee189dde);
+            
+        
+
+        marker_f091607ee4724ce23060c4c45b9682fc.bindPopup(popup_1ba3fee090aa6e059efd021209793790)
+        ;
+
+        
+    
+    
+                marker_f091607ee4724ce23060c4c45b9682fc.setIcon(icon_4a6ad34da9b2fa64ae6eb39830d858aa);
+            
+</script>
+</html>
