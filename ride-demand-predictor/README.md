@@ -1,16 +1,21 @@
-# Nairobi Ride Demand Prediction
+# Nairobi Ride Demand Prediction (RidePulse)
 
-A full-stack application that predicts ride-hailing demand in Nairobi based on location, time, and live weather data. The backend uses FastAPI with a machine learning model, while the frontend provides an interactive React interface with map functionality.
+A full-stack application that predicts boda-boda ride-hailing demand in Nairobi based on location and time. The backend uses FastAPI with a powerful CatBoost machine learning model, and the frontend will provide an interactive React interface with map functionality.
 
 ## Table of Contents
-- [Nairobi Ride Demand Prediction](#nairobi-ride-demand-prediction)
+
+- [Nairobi Ride Demand Prediction (RidePulse)](#nairobi-ride-demand-prediction-ridepulse)
   - [Table of Contents](#table-of-contents)
   - [Project Architecture](#project-architecture)
   - [Features](#features)
   - [Prerequisites](#prerequisites)
-  - [Quick Start](#quick-start)
-  - [Backend Setup](#backend-setup)
-    - [File Structure](#file-structure)
+  - [Backend Setup \& Quick Start](#backend-setup--quick-start)
+    - [1. Clone the Repository](#1-clone-the-repository)
+    - [2. Create and Activate the Conda Environment](#2-create-and-activate-the-conda-environment)
+    - [3. Install Python Dependencies](#3-install-python-dependencies)
+    - [4. Run the Backend Server](#4-run-the-backend-server)
+    - [5. Access the API](#5-access-the-api)
+  - [File Structure](#file-structure)
     - [Installation Steps](#installation-steps)
   - [Frontend Setup](#frontend-setup)
     - [File Structure](#file-structure-1)
@@ -19,10 +24,7 @@ A full-stack application that predicts ride-hailing demand in Nairobi based on l
     - [Model Artifacts](#model-artifacts)
   - [API Documentation](#api-documentation)
     - [Main Endpoints](#main-endpoints)
-  - [Configuration](#configuration)
-    - [Backend Configuration](#backend-configuration)
-    - [Frontend Configuration](#frontend-configuration)
-    - [Environment Variables](#environment-variables)
+    - [Testing the API Manually](#testing-the-api-manually)
   - [Contributing](#contributing)
   - [License](#license)
 
@@ -30,135 +32,99 @@ A full-stack application that predicts ride-hailing demand in Nairobi based on l
 
 The project is structured as a monorepo with two main components:
 
-- **Backend (`backend/`)**: Python-based API built with **FastAPI** that handles business logic, fetches real-time weather data, preprocesses input, and serves predictions from a trained LightGBM model
-- **Frontend (`frontend/`)**: React single-page application with **Vite** and **Leaflet** maps for interactive location selection and demand visualization
+- **Backend (`ride-demand-predictor/backend/`)**: A Python-based API built with FastAPI. It handles prediction requests, preprocesses input, and serves predictions from a trained CatBoost model.
+
+- **Frontend (`ride-demand-predictor/frontend/`)**: A React single-page application (to be built) using Vite and Leaflet for an interactive map interface.
 
 ## Features
 
-- 🗺️ Interactive map interface for location selection
-- 🌤️ Real-time weather data integration via OpenWeatherMap API
-- 🤖 Machine learning predictions using LightGBM
-- 📊 Historical demand analysis
-- 🚀 Fast API responses with automatic documentation
-- 📱 Responsive design for mobile and desktop
+- 🤖 High-accuracy demand predictions using a CatBoost Regressor model
+- 📍 Geospatial logic to find the nearest known hotspot if the requested location has no historical data
+- 🚀 A fast, modern API built with FastAPI
+- 📚 Automatic, interactive API documentation via Swagger UI
+- 📱 A reproducible environment setup for easy team collaboration
 
 ## Prerequisites
 
-- **Backend**: Python 3.7+, pip, venv (recommended)
-- **Frontend**: Node.js 16+, npm
-- **API Key**: OpenWeatherMap API key ([Get one here](https://openweathermap.org/api))
+- **Conda**: For managing Python environments
+- **Python 3.8**: The backend is specifically built and tested on this version
+- **Node.js 16+ & npm**: For the frontend development
 
-## Quick Start
+## Backend Setup & Quick Start
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd nairobi-ride-demand-prediction
-   ```
+These steps will get your backend server running.
 
-2. **Set up the backend**
-   ```bash
-   cd backend
-   python -m venv venv
-   source venv/bin/activate  # Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
+### 1. Clone the Repository
+```bash
+git clone <repository-url>
+cd ride-pulse-nairobi
+```
 
-3. **Configure environment variables**
-   ```bash
-   echo "OPENWEATHER_API_KEY=your_api_key_here" > .env
-   ```
+### 2. Create and Activate the Conda Environment
+This project requires Python 3.8. The following commands create a dedicated Conda environment named `ridepulse-api` to ensure all dependencies are compatible.
 
-4. **Start the backend server**
-   ```bash
-   uvicorn main:app --reload --port 8000
-   ```
+```bash
+conda create --name ridepulse-api python=3.8 --yes
+conda activate ridepulse-api
+```
 
-5. **Set up the frontend** (in a new terminal)
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
+### 3. Install Python Dependencies
+Navigate to the backend directory and install the required packages using pip and the requirements.txt file.
 
-6. **Access the application**
-   - Frontend: http://localhost:3000
-   - API Documentation: http://127.0.0.1:8000/docs
+```bash
+cd ride-demand-predictor/backend
+pip install -r requirements.txt
+```
 
-## Backend Setup
+### 4. Run the Backend Server
+From the backend directory, start the Uvicorn server.
 
-### File Structure
+```bash
+uvicorn main:app --reload --port 8000
+```
+
+### 5. Access the API
+- **API is now running at**: http://127.0.0.1:8000
+- **Interactive API Docs**: http://127.0.0.1:8000/docs
+
+## File Structure
+
 ```
 backend/
-├── .env                        # Environment variables (not in Git)
 ├── main.py                     # FastAPI application and routes
-├── requirements.txt            # Python dependencies
-├── core/
-│   └── config.py              # Environment configuration
-├── ml_models/
-│   ├── lgbm_model.joblib      # Trained model
-│   ├── scaler.joblib          # Feature scaler
-│   └── h3_categories.json     # H3 cell mappings
-├── schemas/
-│   └── prediction.py          # Pydantic request/response models
-└── services/
-    ├── prediction_service.py   # ML prediction logic
-    └── weather_service.py      # Weather API integration
+├── requirements.txt            # Python dependencies (pinned for consistency)
+├── venv/ or Conda env          # The Python environment
+└── ml_models/
+    ├── catboost_model.joblib   # Trained CatBoost model
+    ├── scaler.joblib           # Feature scaler for 'business_ratio'
+    └── h3_categories.json      # H3 cell mappings for the model
 ```
 
 ### Installation Steps
 
-1. **Navigate to backend directory**
-   ```bash
-   cd backend
-   ```
-
-2. **Create virtual environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Windows: venv\Scripts\activate
-   ```
-
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Configure environment**
-   Create `.env` file with:
-   ```env
-   OPENWEATHER_API_KEY=your_openweather_api_key
-   ```
-
-5. **Run the server**
-   ```bash
-   uvicorn main:app --reload --port 8000
-   ```
+(Covered in the Quick Start section above).
 
 ## Frontend Setup
 
+*(This section is a placeholder for when the frontend is developed)*
+
 ### File Structure
+
 ```
 frontend/
-├── public/                     # Static assets
 ├── src/
-│   ├── components/            # React components
-│   │   ├── MapComponent.jsx
-│   │   └── PredictionControls.jsx
-│   ├── services/
-│   │   └── apiService.js      # Backend API calls
-│   ├── App.css               # Main stylesheet
-│   ├── App.jsx               # Main component
-│   └── main.jsx              # React entry point
-├── index.html                # HTML template
-└── package.json              # Dependencies and scripts
+│   ├── components/
+│   │   └── MapComponent.jsx
+│   └── services/
+│       └── apiService.js
+└── package.json
 ```
 
 ### Installation Steps
 
 1. **Navigate to frontend directory**
    ```bash
-   cd frontend
+   cd ride-demand-predictor/frontend
    ```
 
 2. **Install dependencies**
@@ -171,51 +137,52 @@ frontend/
    npm run dev
    ```
 
-4. **Build for production**
-   ```bash
-   npm run build
-   ```
-
 ## Machine Learning Model
 
-The prediction service uses a **LightGBM Regressor** trained on historical ride data with the following features:
+The prediction service uses a **CatBoost Regressor**, which proved to be the most accurate model during evaluation (R² of 0.87, MAE of 0.40). It was trained on historical ride data with the following features:
 
 | Feature | Description |
 |---------|-------------|
-| `h3_cell` | Geospatial index for pickup location |
-| `day_of_week` | Day of week (0=Monday, 6=Sunday) |
-| `hour_of_day` | Hour of day (0-23) |
-| `business_ratio` | Business (1) vs personal (0) ride |
-| `temperature` | Current temperature (°C) |
-| `precipitation` | Rainfall in last hour (mm) |
+| `h3_cell` | Geospatial index (hexagon) for the pickup location. Handled as a category. |
+| `day_of_week` | The day of the week (0=Monday, 6=Sunday). |
+| `hour_of_day` | The hour of the day (0-23). |
+| `business_ratio` | The proportion of rides in that area that were for business purposes. |
 
 ### Model Artifacts
-- `lgbm_model.joblib`: Trained LightGBM model
-- `scaler.joblib`: Feature preprocessing scaler
-- `h3_categories.json`: H3 cell category mappings
+
+- **`catboost_model.joblib`**: The final, trained CatBoost model object
+- **`scaler.joblib`**: A MinMaxScaler object from scikit-learn, fitted on the business_ratio feature
+- **`h3_categories.json`**: A JSON file mapping the string representation of every H3 cell in the training data to an integer code
 
 ## API Documentation
 
-Once the backend is running, visit `http://127.0.0.1:8000/docs` for interactive API documentation powered by Swagger UI.
+Once the backend is running, visit http://127.0.0.1:8000/docs for interactive API documentation.
 
 ### Main Endpoints
-- `POST /predict`: Get demand prediction for location and time
 
-## Configuration
+- **`GET /`**: Root endpoint to check if the API is alive
+- **`POST /predict`**: The main prediction endpoint. It accepts latitude/longitude and returns a demand prediction
 
-### Backend Configuration
-- **Environment Variables**: Configure in `backend/.env`
-- **API Settings**: Modify `backend/core/config.py`
+### Testing the API Manually
 
-### Frontend Configuration
-- **API Endpoint**: Update `API_URL` in `frontend/src/services/apiService.js`
-- **Map Settings**: Configure map defaults in `MapComponent.jsx`
+Since a user knows a place name (e.g., "Kenya National Archives") but the API needs coordinates, you can test it by following these steps:
 
-### Environment Variables
-```env
-# Backend (.env file)
-OPENWEATHER_API_KEY=your_openweather_api_key_here
-```
+1. **Get Coordinates**: Use Google Maps to find the latitude and longitude of a location. Right-click on the map to get the coordinates (e.g., -1.2843, 36.8248).
+
+2. **Use the /docs Interface**: Go to http://127.0.0.1:8000/docs, expand the POST /predict endpoint, and click "Try it out".
+
+3. **Enter the Data**: Fill the request body with the latitude, longitude, and desired time.
+   ```json
+   {
+     "latitude": -1.2843,
+     "longitude": 36.8248,
+     "day_of_week": 2,
+     "hour_of_day": 16,
+     "business_ratio": 0.95
+   }
+   ```
+
+4. **Execute and View Response**: The API will return a detailed response. If it couldn't find data for the exact spot, the `is_fallback` flag will be true, and `prediction_h3_cell` will show the location of the nearby hotspot it used instead.
 
 ## Contributing
 
@@ -227,7 +194,7 @@ OPENWEATHER_API_KEY=your_openweather_api_key_here
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License.
 
 ---
 
