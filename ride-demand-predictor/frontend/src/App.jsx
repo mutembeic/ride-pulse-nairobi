@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import * as h3 from 'h3-js';
+import { getDistance } from 'geolib';
 import { getDemandPrediction, getCoordsFromLocationName, getLocationNameFromCoords } from './services/apiService';
 import MapComponent from './components/MapComponent';
 import PredictionControls from './components/PredictionControls';
@@ -22,7 +23,7 @@ function App() {
     try {
       let latitude, longitude;
 
-      // Check if we need to geocode a name or if we already have coordinates
+      // Step 1: Get coordinates, either from geocoding or the selected hotspot
       if (params.location.type === 'name') {
         const coords = await getCoordsFromLocationName(params.location.value);
         latitude = coords.latitude;
@@ -35,6 +36,7 @@ function App() {
       setMarkerPosition([latitude, longitude]);
       setMapCenter([latitude, longitude]);
 
+      // Step 2: Prepare data for our prediction API
       const { dateTime, businessRatio } = params;
       const apiParams = {
         latitude,
@@ -44,12 +46,21 @@ function App() {
         business_ratio: businessRatio,
       };
 
+      // Step 3: Get the prediction from our backend
       const result = await getDemandPrediction(apiParams);
 
+      // Step 4: If it's a fallback, enrich the result with a name and distance
       if (result.is_fallback) {
-        const [lat, lon] = h3.cellToLatLng(result.prediction_h3_cell);
-        const fallbackName = await getLocationNameFromCoords(lat, lon);
+        const [fallbackLat, fallbackLon] = h3.cellToLatLng(result.prediction_h3_cell);
+        const fallbackName = await getLocationNameFromCoords(fallbackLat, fallbackLon);
+        
+        const distanceInMeters = getDistance(
+          { latitude, longitude },
+          { latitude: fallbackLat, longitude: fallbackLon }
+        );
+        
         result.fallback_location_name = fallbackName;
+        result.fallback_distance_km = (distanceInMeters / 1000).toFixed(1);
       }
       
       setPrediction(result);
