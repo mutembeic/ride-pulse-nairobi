@@ -5,6 +5,8 @@ import joblib
 import json
 import os
 import h3 
+from catboost import Pool
+from fastapi.middleware.cors import CORSMiddleware
 
 #Application Setup 
 app = FastAPI(
@@ -12,6 +14,23 @@ app = FastAPI(
     description="Predicts boda-boda ride demand for specific hexagonal zones in Nairobi.",
     version="1.1.0" # Version bump for new feature
 )
+
+ 
+# This is where we define which frontends are allowed to talk to our API.
+origins = [
+    "http://localhost:5173",   
+    "http://localhost:3000",  # A common port for Create React App
+    # You can add the deployed frontend URL here later
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allows all headers
+)
+# ---------------------------------------------------------
 
 #Pydantic Schemas 
 class PredictionInput(BaseModel):
@@ -58,23 +77,23 @@ def get_prediction(input_data: PredictionInput) -> dict:
     
     prediction_cell = requested_h3_cell
     is_fallback = False
+    
+    # Define the categorical features list just once
+    categorical_features_indices = [0] # 'h3_cell' is the first column
 
     # 2. Check if the cell is in our known data
     if requested_h3_cell not in known_h3_cells:
         is_fallback = True
         print(f"⚠️ H3 cell {requested_h3_cell} not in training data. Searching for neighbors...")
         
-        # 3. Find the nearest known cells (k-ring of distance 1, then 2, etc.)
         found_cell = False
-        for k in range(1, 6): # Search up to 5 rings away
+        for k in range(1, 6):
             neighbors = h3.grid_disk(requested_h3_cell, k)
             known_neighbors = [cell for cell in neighbors if cell in known_h3_cells]
             
             if known_neighbors:
                 print(f"Found {len(known_neighbors)} known neighbors at distance k={k}.")
-                # Predict for all found neighbors and pick the best one
                 
-                # Prepare a DataFrame for batch prediction
                 neighbor_inputs = []
                 for neighbor_cell in known_neighbors:
                     neighbor_inputs.append({
@@ -86,35 +105,36 @@ def get_prediction(input_data: PredictionInput) -> dict:
                 
                 neighbor_df = pd.DataFrame(neighbor_inputs)
                 neighbor_df['business_ratio'] = scaler.transform(neighbor_df[['business_ratio']])
-                neighbor_df['h3_cell'] = pd.Categorical(neighbor_df['h3_cell'], categories=list(known_h3_cells))
                 
-                predictions = model.predict(neighbor_df)
+                # IMPORTANT FIX: Create a CatBoost Pool to explicitly pass cat features
+                prediction_pool = Pool(data=neighbor_df, cat_features=categorical_features_indices)
+                predictions = model.predict(prediction_pool)
                 
-                # Find the neighbor with the highest prediction
                 best_neighbor_index = predictions.argmax()
                 prediction_cell = known_neighbors[best_neighbor_index]
                 prediction_value = predictions[best_neighbor_index]
                 
                 print(f"Best neighbor is {prediction_cell} with predicted demand {prediction_value:.2f}")
                 found_cell = True
-                break # Exit the loop once we find neighbors
+                break
         
         if not found_cell:
             raise HTTPException(status_code=404, detail="No known ride data available near the requested location.")
     
-    # If we are not in a fallback scenario, we still need to make the prediction
-    if not is_fallback:
-        input_dict = input_data.dict()
-        # We don't need lat/lon for the model itself
-        del input_dict['latitude']
-        del input_dict['longitude']
-        input_dict['h3_cell'] = requested_h3_cell
+    else: # If it's not a fallback, predict on the original cell
+        input_dict = {
+            'h3_cell': requested_h3_cell,
+            'day_of_week': input_data.day_of_week,
+            'hour_of_day': input_data.hour_of_day,
+            'business_ratio': input_data.business_ratio
+        }
         
         input_df = pd.DataFrame([input_dict])
         input_df['business_ratio'] = scaler.transform(input_df[['business_ratio']])
-        input_df['h3_cell'] = pd.Categorical(input_df['h3_cell'], categories=list(known_h3_cells))
         
-        prediction_value = model.predict(input_df)[0]
+        # IMPORTANT FIX: Also use a Pool for the non-fallback case for consistency
+        prediction_pool = Pool(data=input_df, cat_features=categorical_features_indices)
+        prediction_value = model.predict(prediction_pool)[0]
 
     return {
         "requested_h3_cell": requested_h3_cell,
