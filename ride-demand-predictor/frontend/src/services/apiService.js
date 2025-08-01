@@ -65,3 +65,15 @@ export const getLocationNameFromCoords = async (latitude, longitude) => {
     return "Nearby hotspot"; // Fallback name on error
   }
 };
+
+export const getHeatmapData = async (params) => {
+  try {
+    // params should be { lat, lon, day, hour }
+    const response = await apiService.get('/heatmap', { params });
+    return response.data.hotspots;
+  } catch (error) {
+    console.error("Error fetching heatmap data:", error);
+    // Return empty array on error so the app doesn't crash
+    return [];
+  }
+};

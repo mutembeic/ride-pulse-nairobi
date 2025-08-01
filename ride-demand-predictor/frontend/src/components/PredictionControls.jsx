@@ -11,7 +11,7 @@ const getCurrentTimeString = () => {
   return `${pad(now.getHours())}:${pad(now.getMinutes())}`;
 };
 
-const PredictionControls = ({ onPredict, isLoading, apiError, setMapCenter, setMarkerPosition }) => {
+const PredictionControls = ({ onPredict, isLoading, apiError, setMapCenter, setMarkerPosition, lastParams }) => {
   const [locationName, setLocationName] = useState('');
   const [selectedHotspot, setSelectedHotspot] = useState(coreHotspots[0].h3_cell);
   const [dateInput, setDateInput] = useState(getTodayDateString);
@@ -29,6 +29,22 @@ const PredictionControls = ({ onPredict, isLoading, apiError, setMapCenter, setM
       }
     }
   }, [selectedHotspot, setMapCenter, setMarkerPosition]);
+
+
+
+  //useEffect to sync form with clicked hotspot ---
+  useEffect(() => {
+    if (lastParams) {
+        const newDate = new Date();
+        // This is a bit complex just to set the time correctly from the hour
+        newDate.setHours(lastParams.hour_of_day);
+        newDate.setMinutes(0); // Reset minutes
+        
+        // This logic is needed if your dateTime is also being updated for the day
+        // For simplicity we will assume the date remains the current one for now.
+        setTimeInput(newDate.toTimeString().slice(0, 5));
+    }
+  }, [lastParams])
 
   const handleSubmit = (e) => {
     e.preventDefault();
