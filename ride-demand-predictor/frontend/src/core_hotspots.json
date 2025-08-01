@@ -1,0 +1,72 @@
+[
+  {
+    "name": "Kitisuru ward",
+    "h3_cell": "897a6e47697ffff",
+    "latitude": -1.2552461768178897,
+    "longitude": 36.78275899276417,
+    "ride_count": 2435
+  },
+  {
+    "name": "South C",
+    "h3_cell": "897a6e5507bffff",
+    "latitude": -1.3168967552633117,
+    "longitude": 36.82953047817187,
+    "ride_count": 794
+  },
+  {
+    "name": "Brookside Drive",
+    "h3_cell": "897a6e4297bffff",
+    "latitude": -1.2558824884268862,
+    "longitude": 36.79600062950303,
+    "ride_count": 631
+  },
+  {
+    "name": "Dunga Road",
+    "h3_cell": "897a6e5522fffff",
+    "latitude": -1.2999384840935224,
+    "longitude": 36.82988077413676,
+    "ride_count": 575
+  },
+  {
+    "name": "Lanet Road",
+    "h3_cell": "897a6e55227ffff",
+    "latitude": -1.3026853633760136,
+    "longitude": 36.82816716696222,
+    "ride_count": 570
+  },
+  {
+    "name": "Mwanzi Road",
+    "h3_cell": "897a6e4295bffff",
+    "latitude": -1.2591056024513765,
+    "longitude": 36.80421759150957,
+    "ride_count": 417
+  },
+  {
+    "name": "Laikipia Road",
+    "h3_cell": "897a6e42983ffff",
+    "latitude": -1.2728365089454923,
+    "longitude": 36.79564797234235,
+    "ride_count": 332
+  },
+  {
+    "name": "Parliament Road",
+    "h3_cell": "897a6e42ca3ffff",
+    "latitude": -1.2910632151130037,
+    "longitude": 36.82178003870076,
+    "ride_count": 322
+  },
+  {
+    "name": "Kirinyaga Road",
+    "h3_cell": "897a6e42c77ffff",
+    "latitude": -1.279918302478246,
+    "longitude": 36.825324143787796,
+    "ride_count": 292
+  },
+  {
+    "name": "Ngong Road",
+    "h3_cell": "897a6e55807ffff",
+    "latitude": -1.302574943028721,
+    "longitude": 36.766856215821754,
+    "ride_count": 253
+  }
+]
