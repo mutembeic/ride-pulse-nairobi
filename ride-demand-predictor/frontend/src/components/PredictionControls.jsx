@@ -1,21 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import coreHotspots from '../core_hotspots.json'; // Import the generated data
+import coreHotspots from '../core_hotspots.json';
 
+// Helper to get today's date in 'YYYY-MM-DD' format
 const getTodayDateString = () => new Date().toISOString().split('T')[0];
+
+// Helper to get current time in 'HH:MM' format
 const getCurrentTimeString = () => {
   const now = new Date();
   const pad = (num) => num.toString().padStart(2, '0');
   return `${pad(now.getHours())}:${pad(now.getMinutes())}`;
 };
 
-const PredictionControls = ({ onPredict, isLoading, apiError, setMapCenter, setMarkerPosition }) => {
+const PredictionControls = ({ onPredict, isLoading, apiError, setMapCenter, setMarkerPosition, lastParams }) => {
   const [locationName, setLocationName] = useState('');
   const [selectedHotspot, setSelectedHotspot] = useState(coreHotspots[0].h3_cell);
   const [dateInput, setDateInput] = useState(getTodayDateString);
   const [timeInput, setTimeInput] = useState(getCurrentTimeString);
+  const [locationType, setLocationType] = useState('commercial');
   const [localError, setLocalError] = useState('');
 
-  // Effect to update the map when a hotspot is selected from the dropdown
   useEffect(() => {
     if (selectedHotspot) {
       const hotspot = coreHotspots.find(h => h.h3_cell === selectedHotspot);
@@ -28,29 +31,55 @@ const PredictionControls = ({ onPredict, isLoading, apiError, setMapCenter, setM
   }, [selectedHotspot, setMapCenter, setMarkerPosition]);
 
 
+
+  //useEffect to sync form with clicked hotspot ---
+  useEffect(() => {
+    if (lastParams) {
+        const newDate = new Date();
+        // This is a bit complex just to set the time correctly from the hour
+        newDate.setHours(lastParams.hour_of_day);
+        newDate.setMinutes(0); // Reset minutes
+        
+        // This logic is needed if your dateTime is also being updated for the day
+        // For simplicity we will assume the date remains the current one for now.
+        setTimeInput(newDate.toTimeString().slice(0, 5));
+    }
+  }, [lastParams])
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setLocalError('');
 
-    const combinedDateTime = new Date(`${dateInput}T${timeInput}`);
-    if (combinedDateTime < new Date()) {
+    const selectedDateTime = new Date(`${dateInput}T${timeInput}`);
+    if (selectedDateTime < new Date()) {
       setLocalError("Please select a future date and time for prediction.");
       return;
     }
+
+    let businessRatioValue = 0.5;
+    if (locationType === 'commercial') {
+      businessRatioValue = 0.85;
+    } else if (locationType === 'residential') {
+      businessRatioValue = 0.20;
+    } else if (locationType === 'mixed') {
+      businessRatioValue = 0.55;
+    }
     
     let targetLocation;
-    // Prioritize the custom text input if the user has typed in it
     if (locationName.trim() !== "") {
         targetLocation = { type: 'name', value: locationName };
-    } else {
+    } else if (selectedHotspot) {
         const hotspot = coreHotspots.find(h => h.h3_cell === selectedHotspot);
         targetLocation = { type: 'coords', value: { latitude: hotspot.latitude, longitude: hotspot.longitude }};
+    } else {
+        setLocalError("Please select a hotspot or enter a custom location.");
+        return;
     }
 
     onPredict({
       location: targetLocation,
-      dateTime: combinedDateTime,
-      businessRatio: 0.85, // We can refine this later
+      dateTime: selectedDateTime,
+      businessRatio: businessRatioValue,
     });
   };
 
@@ -65,7 +94,7 @@ const PredictionControls = ({ onPredict, isLoading, apiError, setMapCenter, setM
           value={selectedHotspot}
           onChange={(e) => {
               setSelectedHotspot(e.target.value);
-              setLocationName(''); // Clear custom input when hotspot is chosen
+              setLocationName('');
               setLocalError('');
           }}
           className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:ring-cyan-500 focus:border-cyan-500"
@@ -90,16 +119,29 @@ const PredictionControls = ({ onPredict, isLoading, apiError, setMapCenter, setM
           value={locationName}
           onChange={(e) => {
               setLocationName(e.target.value);
-              setSelectedHotspot(''); // Clear hotspot when typing custom
+              setSelectedHotspot('');
               setLocalError('');
           }}
           placeholder="e.g., The Sarit Centre"
-          className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:ring-cyan-500 focus:border-cyan-500"
+          className={`w-full bg-gray-700 border rounded-lg p-2.5 text-white focus:ring-cyan-500 focus:border-cyan-500 ${localError ? 'border-red-500' : 'border-gray-600'}`}
         />
       </div>
-      
-      {localError && <p className="text-sm text-red-400 mt-2">{localError}</p>}
-      {apiError && <p className="text-sm text-red-400 mt-2">{apiError}</p>}
+
+      <div>
+        <label htmlFor="locationType" className="block text-sm font-medium text-gray-300 mb-2">
+          Select Location Type
+        </label>
+        <select
+          id="locationType"
+          value={locationType}
+          onChange={(e) => setLocationType(e.target.value)}
+          className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:ring-cyan-500 focus:border-cyan-500"
+        >
+          <option value="commercial">Commercial / Office Area</option>
+          <option value="mixed">Mixed-Use / Entertainment</option>
+          <option value="residential">Residential Area</option>
+        </select>
+      </div>
 
       <div className="flex gap-4 pt-2">
         <div className="w-1/2">
@@ -112,6 +154,9 @@ const PredictionControls = ({ onPredict, isLoading, apiError, setMapCenter, setM
         </div>
       </div>
       
+      {localError && <p className="text-sm text-red-400 mt-2">{localError}</p>}
+      {apiError && <p className="text-sm text-red-400 mt-2">{apiError}</p>}
+
       <button
         type="submit"
         disabled={isLoading}

@@ -7,6 +7,8 @@ import os
 import h3 
 from catboost import Pool
 from fastapi.middleware.cors import CORSMiddleware
+from typing import List, Dict, Optional
+
 
 #Application Setup 
 app = FastAPI(
@@ -46,6 +48,15 @@ class PredictionOutput(BaseModel):
     predicted_demand: float
     predicted_demand_rounded: int
     is_fallback: bool = Field(..., description="True if the prediction is for the nearest known cell, not the exact requested cell.")
+
+
+class HeatmapPoint(BaseModel):
+    h3_cell: str
+    demand: float
+
+class HeatmapOutput(BaseModel):
+    center_h3_cell: str
+    hotspots: List[HeatmapPoint]
 
 #Loading Model Artifacts 
 MODEL_DIR = './ml_models/'
@@ -143,6 +154,61 @@ def get_prediction(input_data: PredictionInput) -> dict:
         "predicted_demand_rounded": round(float(prediction_value)),
         "is_fallback": is_fallback
     }
+
+
+@app.get("/heatmap", response_model=HeatmapOutput, tags=["Prediction"])
+def get_heatmap_data(lat: float, lon: float, day: int, hour: int):
+    """
+    Generates demand prediction data for a grid of H3 cells around a central point.
+    """
+    if not model:
+        raise HTTPException(status_code=503, detail="Model is not available.")
+    
+    H3_RESOLUTION = 12 # Use the fine resolution for the grid
+    GRID_RADIUS = 7      # How many rings of hexagons to calculate around the center
+
+    try:
+        center_cell = h3.latlng_to_cell(lat, lon, H3_RESOLUTION)
+        # Get all cells within the specified radius
+        grid_cells = h3.grid_disk(center_cell, GRID_RADIUS)
+        
+        # Filter for only the cells we have historical data for
+        relevant_cells = [cell for cell in grid_cells if cell in known_h3_cells]
+
+        if not relevant_cells:
+            return HeatmapOutput(center_h3_cell=center_cell, hotspots=[])
+
+        # Prepare a DataFrame for batch prediction
+        heatmap_inputs = [{
+            'h3_cell': cell,
+            'day_of_week': day,
+            'hour_of_day': hour,
+            'business_ratio': 0.70 # Use an average business_ratio for the heatmap
+        } for cell in relevant_cells]
+        
+        heatmap_df = pd.DataFrame(heatmap_inputs)
+        
+        # Preprocessing
+        heatmap_df['business_ratio'] = scaler.transform(heatmap_df[['business_ratio']])
+        
+        # Create CatBoost Pool
+        prediction_pool = Pool(data=heatmap_df, cat_features=[0])
+        
+        # Get predictions
+        predictions = model.predict(prediction_pool)
+        
+        # Format the output
+        hotspots = [
+            HeatmapPoint(h3_cell=cell, demand=demand) 
+            for cell, demand in zip(relevant_cells, predictions)
+        ]
+        
+        return HeatmapOutput(center_h3_cell=center_cell, hotspots=hotspots)
+
+    except Exception as e:
+        print(f"Error generating heatmap: {e}")
+        raise HTTPException(status_code=500, detail="Could not generate heatmap data.")
+
 
 # --- API Endpoints ---
 @app.get("/", tags=["General"])

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Polygon, Circle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import * as h3 from 'h3-js';
@@ -11,6 +11,49 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 });
+
+// --- NEW: Heatmap Colors // Red (very high) // Orange (high) // Yellow (medium) // Green (low)---
+const getDemandColor = (demand) => {
+  if (demand >= 5) return '#ff0000';  
+  if (demand >= 3) return '#ff8c00';  
+  if (demand >= 2) return '#ffd700'; 
+  return '#00ff00';  
+};
+const HeatmapLayer = ({ data, onHotspotClick }) => {
+  return (
+    <>
+      {data.map((point) => {
+        const boundary = h3.cellToBoundary(point.h3_cell);
+        const color = getDemandColor(point.demand);
+
+        return (
+          <Polygon
+            key={point.h3_cell}
+            positions={boundary}
+            pathOptions={{
+              fillColor: color,
+              fillOpacity: 0.6,
+              stroke: true,
+              color: '#ffffff', // Add a white border for definition
+              weight: 0.5,
+            }}
+            // --- NEW: Click Handler ---
+            eventHandlers={{
+              click: () => {
+                onHotspotClick(point); // Pass the entire hotspot data point up
+              },
+            }}
+          >
+            <Popup>
+                Predicted Demand: {point.demand.toFixed(2)}
+            </Popup>
+          </Polygon>
+        );
+      })}
+    </>
+  );
+};
+
 
 // A component to handle map events and updates
 const MapEvents = ({ setMarkerPosition, predictionResult, center }) => {
@@ -33,7 +76,7 @@ const MapEvents = ({ setMarkerPosition, predictionResult, center }) => {
   return null;
 };
 
-const MapComponent = ({ center, markerPosition, setMarkerPosition, predictionResult }) => {
+const MapComponent = ({ center, markerPosition, setMarkerPosition, predictionResult,  heatmapData, onHotspotClick}) => {
     
   const predictionHexagon = useMemo(() => {
     if (!predictionResult) return null;
@@ -45,7 +88,7 @@ const MapComponent = ({ center, markerPosition, setMarkerPosition, predictionRes
   return (
     <MapContainer
       center={center || markerPosition}
-      zoom={13}
+      zoom={15}
       style={{ height: '100%', width: '100%' }}
       scrollWheelZoom={true}
     >
@@ -55,7 +98,7 @@ const MapComponent = ({ center, markerPosition, setMarkerPosition, predictionRes
         attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>'
       />
       <MapEvents setMarkerPosition={setMarkerPosition} predictionResult={predictionResult} center={center} />
-      
+      {heatmapData && heatmapData.length > 0 && <HeatmapLayer data={heatmapData} onHotspotClick={onHotspotClick} />}
       {markerPosition && !predictionResult && (
         <Marker position={markerPosition}>
           <Popup>Selected Location. Press "Predict" to see demand.</Popup>
