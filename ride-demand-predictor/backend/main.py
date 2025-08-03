@@ -22,15 +22,15 @@ app = FastAPI(
 origins = [
     "http://localhost:5173",   
     "http://localhost:3000",  # A common port for Create React App
-    # You can add the deployed frontend URL here later
+    
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 # ---------------------------------------------------------
 
