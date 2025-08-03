@@ -26,9 +26,9 @@ export const getCoordsFromLocationName = async (locationName) => {
   try {
     const response = await axios.get(GEOCODE_URL, {
       params: {
-        q: `${locationName}, Nairobi, Kenya`, // Be specific to improve results
+        q: `${locationName}, Nairobi, Kenya`, 
         format: 'json',
-        limit: 1 // We only want the top result
+        limit: 1 
       }
     });
     if (response.data && response.data.length > 0) {

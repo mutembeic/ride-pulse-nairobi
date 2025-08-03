@@ -6,26 +6,30 @@ import MapComponent from './components/MapComponent';
 import PredictionControls from './components/PredictionControls';
 import PredictionResult from './components/PredictionResult';
 
+
 function App() {
+  
   const [prediction, setPrediction] = useState(null);
+  const [lastSuccessfulPrediction, setLastSuccessfulPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [mapCenter, setMapCenter] = useState([-1.286389, 36.817223]); // Default: Nairobi CBD
+  const [mapCenter, setMapCenter] = useState([-1.286389, 36.817223]);
   const [markerPosition, setMarkerPosition] = useState([-1.286389, 36.817223]);
   const [heatmapData, setHeatmapData] = useState([]);
-  const [lastParams, setLastParams] = useState(null); // Tracks the last user search
+  const [lastParams, setLastParams] = useState(null);
 
   const handlePredict = async (params) => {
     if (!params) return;
 
     setLoading(true);
     setError('');
+    // Clear both the map and the result panel at the start of a new prediction
     setPrediction(null);
+    setLastSuccessfulPrediction(null);
     
     try {
       let latitude, longitude;
 
-      // Step 1: Get coordinates, either from geocoding a name or from a pre-defined hotspot
       if (params.location.type === 'name') {
         const coords = await getCoordsFromLocationName(params.location.value);
         latitude = coords.latitude;
@@ -38,19 +42,27 @@ function App() {
       setMarkerPosition([latitude, longitude]);
       setMapCenter([latitude, longitude]);
 
-      const { dateTime, businessRatio } = params;
+      let dateTime = params.dateTime;
+      if (!dateTime) {
+        dateTime = new Date();
+        dateTime.setHours(dateTime.getHours() + 1);
+        dateTime.setMinutes(0);
+        dateTime.setSeconds(0);
+        dateTime.setMilliseconds(0);
+      }
 
-      // Step 2: Prepare parameters for API calls and store them
+      const businessRatio = params.businessRatio !== undefined ? params.businessRatio : 0.85;
+
       const apiParams = {
         latitude,
         longitude,
         day_of_week: dateTime.getDay() === 0 ? 6 : dateTime.getDay() - 1,
         hour_of_day: dateTime.getHours(),
         business_ratio: businessRatio,
+        dateTime: dateTime, 
       };
-      setLastParams(apiParams); // Save the last successful search parameters
+      setLastParams(apiParams);
 
-      // Step 3: Fetch heatmap data in the background
       getHeatmapData({
         lat: latitude,
         lon: longitude,
@@ -58,10 +70,8 @@ function App() {
         hour: apiParams.hour_of_day,
       }).then(setHeatmapData);
 
-      // Step 4: Get the primary prediction for the exact point
       const result = await getDemandPrediction(apiParams);
 
-      // Step 5: If it was a fallback, enrich the result with a name and distance
       if (result.is_fallback) {
         const [fallbackLat, fallbackLon] = h3.cellToLatLng(result.prediction_h3_cell);
         const fallbackName = await getLocationNameFromCoords(fallbackLat, fallbackLon);
@@ -74,11 +84,12 @@ function App() {
         result.location_display_name = fallbackName;
         result.fallback_distance_km = (distanceInMeters / 1000).toFixed(1);
       } else {
-        // If it's NOT a fallback, get the name of the searched location
         result.location_display_name = await getLocationNameFromCoords(latitude, longitude);
       }
       
+      // On success, update both the map and the result panel
       setPrediction(result);
+      setLastSuccessfulPrediction(result);
 
     } catch (err) {
       setError(err.toString());
@@ -88,7 +99,25 @@ function App() {
     }
   };
 
-  // Handler for when a user clicks a hexagon on the map
+  const handleMapClickPredict = async (latitude, longitude) => {
+    const params = {
+      location: { type: 'coords', value: { latitude, longitude } },
+    };
+
+    if (lastParams && lastParams.dateTime && lastParams.business_ratio !== undefined) {
+      params.dateTime = lastParams.dateTime;
+      params.businessRatio = lastParams.business_ratio;
+    }
+    
+    await handlePredict(params);
+  };
+
+  const handleMapClick = (lat, lng) => {
+    // This now ONLY clears the map's prediction state, leaving the result panel intact
+    setMarkerPosition([lat, lng]);
+    setPrediction(null);
+  };
+
   const handleHotspotClick = async (hotspotData) => {
     setLoading(true);
     setError('');
@@ -97,19 +126,20 @@ function App() {
         const [lat, lon] = h3.cellToLatLng(hotspotData.h3_cell);
         const name = await getLocationNameFromCoords(lat, lon);
         
-        // Construct a new prediction result object directly from the heatmap data
         const newPrediction = {
             requested_h3_cell: hotspotData.h3_cell,
             prediction_h3_cell: hotspotData.h3_cell,
             predicted_demand: hotspotData.demand,
             predicted_demand_rounded: Math.round(hotspotData.demand),
-            is_fallback: false, // Not a fallback, it's a direct click on a known cell
-            fallback_location_name: name, // Reuse this field to show the name
-            fallback_distance_km: 0, // No distance as it's a direct selection
+            is_fallback: false,
+            fallback_location_name: name,
+            fallback_distance_km: 0,
             location_display_name: name 
         };
         
+        // When clicking a hotspot, treat it as a full prediction
         setPrediction(newPrediction);
+        setLastSuccessfulPrediction(newPrediction);
         setMarkerPosition([lat, lon]);
         setMapCenter([lat, lon]);
 
@@ -120,22 +150,17 @@ function App() {
     }
   };
 
-  // Effect to get user's location and initial heatmap on app load
   useEffect(() => {
     const defaultLocation = { lat: -1.286389, lon: 36.817223 };
     
-    const fetchInitialHeatmap = (coords) => {
-        const now = new Date();
-        const heatmapParams = {
-            lat: coords.lat,
-            lon: coords.lon,
-            day: now.getDay() === 0 ? 6 : now.getDay() - 1,
-            hour: now.getHours(),
-        };
-        setLoading(true);
-        getHeatmapData(heatmapParams)
-          .then(setHeatmapData)
-          .finally(() => setLoading(false));
+    const initiatePredictionForLocation = async (coords) => {
+      setMapCenter([coords.lat, coords.lon]);
+      setMarkerPosition([coords.lat, coords.lon]);
+
+      const initialPredictParams = {
+        location: { type: 'coords', value: { latitude: coords.lat, longitude: coords.lon } },
+      };
+      await handlePredict(initialPredictParams);
     };
 
     if ("geolocation" in navigator) {
@@ -145,18 +170,16 @@ function App() {
               lat: position.coords.latitude, 
               lon: position.coords.longitude 
           };
-          setMapCenter([userCoords.lat, userCoords.lon]);
-          setMarkerPosition([userCoords.lat, userCoords.lon]);
-          fetchInitialHeatmap(userCoords);
+          initiatePredictionForLocation(userCoords);
         },
         () => {
           console.warn("User denied location. Defaulting to CBD.");
-          fetchInitialHeatmap(defaultLocation);
+          initiatePredictionForLocation(defaultLocation);
         }
       );
     } else {
       console.log("Geolocation not available. Defaulting to CBD.");
-      fetchInitialHeatmap(defaultLocation);
+      initiatePredictionForLocation(defaultLocation);
     }
   }, []);
 
@@ -175,7 +198,8 @@ function App() {
           setMapCenter={setMapCenter}
           lastParams={lastParams}
         />
-        <PredictionResult result={prediction} isLoading={loading} error={error} />
+        {/* The result panel now uses 'lastSuccessfulPrediction' */}
+        <PredictionResult result={lastSuccessfulPrediction} isLoading={loading} error={error} />
       </div>
       <div className="w-full flex-grow h-full">
         <MapComponent
@@ -185,6 +209,8 @@ function App() {
           predictionResult={prediction}
           heatmapData={heatmapData}
           onHotspotClick={handleHotspotClick}
+          onMapClickPredict={handleMapClickPredict}
+          onMapClick={handleMapClick} 
         />
       </div>
     </div>
