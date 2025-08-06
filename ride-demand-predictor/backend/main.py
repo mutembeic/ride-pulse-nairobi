@@ -21,7 +21,8 @@ app = FastAPI(
 # This is where we define which frontends are allowed to talk to our API.
 origins = [
     "http://localhost:5175",   
-    "http://localhost:3000",  # A common port for Create React App
+    "http://localhost:3000",   
+    "https://ride-pulse-nairobi.onrender.com",
     
 ]
 
