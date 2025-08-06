@@ -22,7 +22,7 @@ app = FastAPI(
 origins = [
     "http://localhost:5175",   
     "http://localhost:3000",   
-    "https://ride-pulse-nairobi.onrender.com",
+    "https://ride-pulse-nairobi-i7vt.vercel.app",
     
 ]
 
