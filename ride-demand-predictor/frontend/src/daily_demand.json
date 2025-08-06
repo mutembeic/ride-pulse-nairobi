@@ -1,0 +1,30 @@
+[
+  {
+    "day_name": "Monday",
+    "average_demand": 122.2258064516129
+  },
+  {
+    "day_name": "Tuesday",
+    "average_demand": 127.70967741935483
+  },
+  {
+    "day_name": "Wednesday",
+    "average_demand": 123.3225806451613
+  },
+  {
+    "day_name": "Thursday",
+    "average_demand": 136.38709677419354
+  },
+  {
+    "day_name": "Friday",
+    "average_demand": 128.80645161290323
+  },
+  {
+    "day_name": "Saturday",
+    "average_demand": 40.766666666666666
+  },
+  {
+    "day_name": "Sunday",
+    "average_demand": 6.0
+  }
+]
