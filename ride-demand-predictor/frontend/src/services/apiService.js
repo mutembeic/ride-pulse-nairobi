@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const API_URL = 'http://127.0.0.1:8000';
+const API_URL = 'https://ride-pulse-nairobi.onrender.com' || 'http://127.0.0.1:8000';
 // New: Nominatim Geocoding API endpoint
 const GEOCODE_URL = 'https://nominatim.openstreetmap.org/search';
 // New: Nominatim Reverse Geocoding API endpoint
