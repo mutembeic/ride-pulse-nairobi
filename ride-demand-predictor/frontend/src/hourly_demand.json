@@ -1,0 +1,92 @@
+[
+  {
+    "hour": 0,
+    "demand_count": 1,
+    "average_demand": 0.03225806451612903
+  },
+  {
+    "hour": 6,
+    "demand_count": 8,
+    "average_demand": 0.25806451612903225
+  },
+  {
+    "hour": 7,
+    "demand_count": 156,
+    "average_demand": 5.032258064516129
+  },
+  {
+    "hour": 8,
+    "demand_count": 918,
+    "average_demand": 29.612903225806452
+  },
+  {
+    "hour": 9,
+    "demand_count": 2198,
+    "average_demand": 70.90322580645162
+  },
+  {
+    "hour": 10,
+    "demand_count": 2637,
+    "average_demand": 85.06451612903226
+  },
+  {
+    "hour": 11,
+    "demand_count": 2660,
+    "average_demand": 85.80645161290323
+  },
+  {
+    "hour": 12,
+    "demand_count": 2754,
+    "average_demand": 88.83870967741936
+  },
+  {
+    "hour": 13,
+    "demand_count": 2320,
+    "average_demand": 74.83870967741936
+  },
+  {
+    "hour": 14,
+    "demand_count": 2710,
+    "average_demand": 87.41935483870968
+  },
+  {
+    "hour": 15,
+    "demand_count": 2554,
+    "average_demand": 82.38709677419355
+  },
+  {
+    "hour": 16,
+    "demand_count": 1387,
+    "average_demand": 44.74193548387097
+  },
+  {
+    "hour": 17,
+    "demand_count": 559,
+    "average_demand": 18.032258064516128
+  },
+  {
+    "hour": 18,
+    "demand_count": 207,
+    "average_demand": 6.67741935483871
+  },
+  {
+    "hour": 19,
+    "demand_count": 89,
+    "average_demand": 2.870967741935484
+  },
+  {
+    "hour": 20,
+    "demand_count": 30,
+    "average_demand": 0.967741935483871
+  },
+  {
+    "hour": 21,
+    "demand_count": 11,
+    "average_demand": 0.3548387096774194
+  },
+  {
+    "hour": 22,
+    "demand_count": 2,
+    "average_demand": 0.06451612903225806
+  }
+]
