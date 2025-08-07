@@ -1,5 +1,3 @@
-# sendy-logistics-challenge
-
 # RidePulse Nairobi
 
 ## Helping Boda-Boda Riders Find Customers Faster
